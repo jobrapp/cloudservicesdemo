@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="source_icons">
+        <item>@drawable/ic_source_device</item>
+        <item>@drawable/ic_source_google_drive</item>
+        <item>@drawable/ic_source_dropbox</item>
+        <item>@drawable/ic_source_box</item>
+        <item>@drawable/ic_source_gmail</item>
+        <item>@drawable/ic_source_onedrive</item>
+        <item>@drawable/ic_source_amazon_drive</item>
+    </array>
+</resources>

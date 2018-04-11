@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">CloudServices Demo</string>
+    <string name="api_key" translatable="false">A5K2gZC7NSmKsHm7TSjZoz</string>
+    <string-array name="sources">
+        <item name="source_local">@string/source_local</item>
+        <item name="source_google_drive">@string/source_google_drive</item>
+        <item name="source_dropbox">@string/source_dropbox</item>
+        <item name="source_box">@string/source_box</item>
+        <item name="source_gmail">@string/source_gmail</item>
+        <item name="source_onedrive">@string/source_onedrive</item>
+        <item name="source_amazon_drive">@string/source_amazon_drive</item>
+    </string-array>
+
+    <string name="source_local">Device</string>
+    <string name="source_google_drive">Google Drive</string>
+    <string name="source_dropbox">Dropbox</string>
+    <string name="source_box">Box</string>
+    <string name="source_gmail">Gmail</string>
+    <string name="source_onedrive">OneDrive</string>
+    <string name="source_amazon_drive">Amazon Drive</string>
+
+
+    // Dropbox
+    <string name="dropbox_app_key" translatable="false">ostz7nnjlmhrdcs</string>
+
+    // Box
+    <string name="box_client_key" translatable="false">ln6p4vunsf4lnrtrwkfyimw4knkzge90</string>
+    <string name="box_client_secret" translatable="false">yzREjT8dl33pGRkS9imum78ruXXribZl</string>
+
+    // OneDrive
+    <string name="onedrive_app_id" translatable="false">0915a7c3-befc-42e7-bc50-7d20e54d9b1f</string>
+    <string name="onedrive_redirect_url" translatable="false">msal0915a7c3-befc-42e7-bc50-7d20e54d9b1f://auth</string>
+
+
+</resources>
