@@ -4,7 +4,7 @@ import android.content.Context
 import com.jobrapp.cloudservicesdemo.data.Sources
 
 /**
- *
+ * Hold the string, type and Icon Id
  */
 enum class SourceTypes(val sourceNameResource : Int, val fileStackSource : Sources, val icon : Int) {
     DEVICE(R.string.source_local, Sources.DEVICE, R.drawable.ic_source_device),
@@ -13,7 +13,6 @@ enum class SourceTypes(val sourceNameResource : Int, val fileStackSource : Sourc
     DROPBOX(R.string.source_dropbox, Sources.DROPBOX, R.drawable.ic_source_dropbox),
     BOX(R.string.source_box, Sources.BOX, R.drawable.ic_source_box),
     ONEDRIVE(R.string.source_onedrive, Sources.ONEDRIVE, R.drawable.ic_source_onedrive);
-//    AMAZON_DRIVE(R.string.source_amazon_drive, Sources.AMAZON_DRIVE, R.drawable.ic_source_amazon_drive);
 
     fun getDeviceName(context: Context) : String {
         return context.getString(sourceNameResource)

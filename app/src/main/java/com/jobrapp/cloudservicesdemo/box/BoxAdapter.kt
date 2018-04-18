@@ -9,7 +9,7 @@ import com.jobrapp.cloudservicesdemo.R
 import com.jobrapp.cloudservicesdemo.views.FileHolder
 
 /**
- *
+ * Handle Box Files
  */
 class BoxAdapter  : RecyclerView.Adapter<FileHolder>() {
     var handler : ClickHandler? = null

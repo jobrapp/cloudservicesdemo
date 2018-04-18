@@ -23,19 +23,6 @@ import java.io.File
 import java.util.*
 
 
-fun Any?.ifNotNullElse(check : Boolean?, ifBlock : (() -> Unit)? = null, elseBlock: (() -> Unit)? = null) : Boolean {
-    if (this == null || check == null) {
-        elseBlock?.invoke()
-        return false
-    }
-    if (check == false) {
-        elseBlock?.invoke()
-        return false
-    }
-    ifBlock?.invoke()
-    return true
-}
-
 /**
  * Handle Google Drive Services
  */
@@ -95,11 +82,12 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
             requiredScopes.add(Drive.SCOPE_FILE)
             requiredScopes.add(Drive.SCOPE_APPFOLDER)
             mSignInAccount = GoogleSignIn.getLastSignedInAccount(activity)
-            mSignInAccount.ifNotNullElse(mSignInAccount?.grantedScopes?.containsAll(requiredScopes), {
+            val containsScope = mSignInAccount?.grantedScopes?.containsAll(requiredScopes)
+            if (mSignInAccount != null && containsScope != null && containsScope) {
                 initializeDriveClient(mSignInAccount!!)
-            }, {
+            } else {
                 activity.startActivityForResult(mGoogleSigninClient.signInIntent, REQUEST_CODE_SIGN_IN)
-            })
+            }
         }
     }
 
@@ -131,6 +119,7 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
     override fun downloadFile(data: FileDataType?) {
         if (data == null || (data !is FileData)) {
             Log.e(TAG, "downloadFile data is null")
+            serviceListener?.handleError(CloudServiceException(""))
             return
         }
         val drive = data.data as DriveFile

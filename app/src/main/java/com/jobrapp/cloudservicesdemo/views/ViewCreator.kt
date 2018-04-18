@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 
 /**
- *
+ * Singleton helper used to create the view and call onViewCreated
  */
 object ViewCreator {
 

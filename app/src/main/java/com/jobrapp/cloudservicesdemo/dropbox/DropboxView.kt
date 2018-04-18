@@ -24,7 +24,7 @@ import java.io.File
 class DropboxView : BaseView(), ClickHandler, ServiceListener {
     lateinit var recyclerView: RecyclerView
     lateinit var viewContext: Context
-    val adapter = GoogleDriveAdapter()
+    val adapter = DropboxAdapter()
     lateinit var dropboxClient : DropboxService
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?): View {

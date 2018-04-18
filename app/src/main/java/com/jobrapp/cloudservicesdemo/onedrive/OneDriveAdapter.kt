@@ -9,7 +9,7 @@ import com.jobrapp.cloudservicesdemo.R
 import com.jobrapp.cloudservicesdemo.views.FileHolder
 
 /**
- *
+ * Adapter for OneDrive Files
  */
 class OneDriveAdapter : RecyclerView.Adapter<FileHolder>() {
     var handler : ClickHandler? = null

@@ -13,7 +13,7 @@ import com.jobrapp.cloudservicesdemo.SourceTypes
 
 
 /**
- *
+ * Show the services that are available
  */
 class ServicesView : BaseView() {
     lateinit var recyclerView: RecyclerView
