@@ -44,7 +44,7 @@ class LocalView : BaseView(), ServiceListener {
         }
     }
 
-    override fun currentFiles(files: List<FileDataType>) {
+    override fun currentFiles(currentPath : String, files: List<FileDataType>) {
     }
 
     override fun cancelled() {

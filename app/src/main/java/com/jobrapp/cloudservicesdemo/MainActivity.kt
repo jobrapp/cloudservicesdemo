@@ -3,9 +3,7 @@ package com.jobrapp.cloudservicesdemo
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
@@ -13,7 +11,7 @@ import android.widget.FrameLayout
 import com.jobrapp.cloudservices.services.PermissionsManager
 import com.jobrapp.cloudservices.services.gmail.GmailService
 import com.jobrapp.cloudservicesdemo.box.BoxView
-import com.jobrapp.cloudservicesdemo.box.GmailView
+import com.jobrapp.cloudservicesdemo.gmail.GmailView
 import com.jobrapp.cloudservicesdemo.data.Sources
 import com.jobrapp.cloudservicesdemo.dropbox.DropboxView
 import com.jobrapp.cloudservicesdemo.googledrive.GoogleDriveView

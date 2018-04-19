@@ -38,9 +38,9 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
             client.authenticate(context)
                     .addOnCompletedListener { response ->
                         if (response.isSuccess) {
-                            val token = response.result.authInfo.accessToken()
-                            if (token != null) {
-                                prefs.putString(BOX_ACCESS_TOKEN, response.result.authInfo.accessToken())
+                            val authToken = response.result.authInfo.accessToken()
+                            if (authToken != null) {
+                                prefs.putString(BOX_ACCESS_TOKEN, authToken)
                                 getFiles(ROOT_FOLDER)
                             }
                         } else {
@@ -80,13 +80,16 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
     }
 
     override fun getFiles(path: String?) {
+        if (path == null) {
+            return
+        }
         launch(CommonPool) {
             try {
                 val folderAPI = BoxApiFolder(client)
                 val items = folderAPI.getItemsRequest(path).send()
                 if (items != null) {
                     launch(UI) {
-                        serviceListener?.currentFiles(convertEntries(items.entries))
+                        serviceListener?.currentFiles(path, convertEntries(items.entries))
                     }
                 }
 

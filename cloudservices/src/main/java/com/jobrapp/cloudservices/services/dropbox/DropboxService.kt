@@ -60,13 +60,16 @@ class DropboxService(val context: Context, val config: DropboxConfig) : BaseServ
     }
 
     override fun getFiles(path : String?) {
+        if (path == null) {
+            return
+        }
         launch(CommonPool) {
             val files = client?.files()
             if (files != null) {
                 val metaDataEntries = files.listFolder(path).entries
                 if (metaDataEntries != null) {
                     launch(UI) {
-                        serviceListener?.currentFiles(convertEntries(metaDataEntries))
+                        serviceListener?.currentFiles(path, convertEntries(metaDataEntries))
                     }
                 }
             }

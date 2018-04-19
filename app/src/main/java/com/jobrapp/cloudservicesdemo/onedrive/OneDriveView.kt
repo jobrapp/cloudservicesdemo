@@ -63,7 +63,7 @@ class OneDriveView : BaseView(), ClickHandler, ServiceListener {
         }
     }
 
-    override fun currentFiles(files: List<FileDataType>) {
+    override fun currentFiles(currentPath : String, files: List<FileDataType>) {
         adapter.entries = files as List<FileData>
     }
 

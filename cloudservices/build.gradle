@@ -9,11 +9,12 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 ext {
     supportVersion = "27.1.1"
-    currentVersionCode = 1
-    currentVersion = '1.0'
+    currentVersionCode = 3
+    currentVersion = '1.3'
     github = 'https://github.com/jobrapp/cloudservicesdemo'
     githubUrl = 'https://github.com/jobrapp/cloudservicesdemo.git'
     projName = 'CloudServices'
+    artifcatId = 'cloudservices'
     projDescription = 'Library for Connecting to Cloud Services'
     groupId = 'com.jobrapp.cloudservices'
     buildPath = 'com/jobrapp/cloudservices/' + currentVersion
@@ -146,7 +147,7 @@ install {
 
             packaging 'aar'
             groupId groupId
-            artifactId projName
+            artifactId artifcatId
             version currentVersion
 
             licenses {
@@ -214,4 +215,4 @@ bintray {
     }
 }
 
-bintrayUpload.dependsOn assemble,generateJavadocsJar
+bintrayUpload.dependsOn assemble,generateJavadocsJar,install

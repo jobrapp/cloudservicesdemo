@@ -47,7 +47,7 @@ class DropboxView : BaseView(), ClickHandler, ServiceListener {
         (viewContext as Activity).onBackPressed()
     }
 
-    override fun currentFiles(files: List<FileDataType>) {
+    override fun currentFiles(currentPath : String, files: List<FileDataType>) {
         adapter.entries = files as List<FileData>
     }
 

@@ -4,6 +4,7 @@ import android.Manifest
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Environment
 import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -68,6 +69,17 @@ class GmailService(val activity: Activity) : BaseService() {
         mGoogleSigninClient.signOut()
     }
 
+    fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_GET_ACCOUNT_PERMISSIONS -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    auth()
+                }
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) {
             serviceListener?.cancelled()
@@ -121,7 +133,7 @@ class GmailService(val activity: Activity) : BaseService() {
                         }
                     }
                     launch(UI) {
-                        serviceListener?.currentFiles(gMessages)
+                        serviceListener?.currentFiles("", gMessages)
                     }
                 }
             } catch (e: UserRecoverableAuthIOException) {

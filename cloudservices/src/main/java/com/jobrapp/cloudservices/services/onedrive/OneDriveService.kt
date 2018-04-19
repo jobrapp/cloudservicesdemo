@@ -47,10 +47,13 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
     }
 
     override fun getFiles(path: String?) {
+        if (path == null) {
+            return
+        }
         client?.drive?.getItems(path)?.children?.buildRequest()?.get(object : ICallback<IItemCollectionPage> {
             override fun success(result: IItemCollectionPage) {
                 if (result is ItemCollectionPage) {
-                    serviceListener?.currentFiles(convertEntries(result.currentPage))
+                    serviceListener?.currentFiles(path, convertEntries(result.currentPage))
                 }
             }
 
