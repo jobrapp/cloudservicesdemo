@@ -32,6 +32,14 @@
 
 
 # From Gmail
+-keep class com.google.api.services.gmail.** { *; }
+-keep class com.google.api.client.json.JsonFactory { *; }
+-keep class com.google.api.client.json.jackson2.JacksonFactory { *; }
+-keep class com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64 { *; }
+-keep class com.google.api.client.googleapis.extensions.android.gms.auth.**  { *; }
+-keep class com.google.api.client.http.HttpTransport  { *; }
+-keep class com.google.api.client.util.**  { *; }
+
 -keepattributes Signature,RuntimeVisibleAnnotations,AnnotationDefault
 
 -keepclassmembers class * {
