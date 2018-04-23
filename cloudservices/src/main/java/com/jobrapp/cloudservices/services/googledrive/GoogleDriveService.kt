@@ -88,6 +88,8 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
             } else {
                 activity.startActivityForResult(mGoogleSigninClient.signInIntent, REQUEST_CODE_SIGN_IN)
             }
+        } else {
+            pickFiles(null)
         }
     }
 
