@@ -39,7 +39,7 @@ class GmailService(val activity: Activity) : BaseService() {
     private val googleAccountCredential: GoogleAccountCredential
     var prefs: Prefs = Prefs(activity)
     private var accountName: String? = null
-    private val mGoogleSigninClient : GoogleSignInClient by lazy {
+    private val googleSigninClient : GoogleSignInClient by lazy {
         val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(Drive.SCOPE_FILE)
                 .requestScopes(Drive.SCOPE_APPFOLDER)
@@ -66,10 +66,10 @@ class GmailService(val activity: Activity) : BaseService() {
     }
 
     override fun logout() {
-        mGoogleSigninClient.signOut()
+        googleSigninClient.signOut()
     }
 
-    fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             REQUEST_GET_ACCOUNT_PERMISSIONS -> {
                 // If request is cancelled, the result arrays are empty.
@@ -103,7 +103,7 @@ class GmailService(val activity: Activity) : BaseService() {
         }
     }
 
-    private fun getEmails() {
+    fun getEmails() {
         launch(CommonPool) {
             try {
                 val gmail = getGmailClient()
@@ -144,16 +144,40 @@ class GmailService(val activity: Activity) : BaseService() {
         }
     }
 
+    override fun getFiles(path: String?) {
+        if (path == null) {
+            return
+        }
+        launch(CommonPool) {
+            try {
+                val gmail = getGmailClient()
+                val message = gmail.users().messages().get("me", path).execute()
+                val parts = message.payload.parts
+                val gmailList = ArrayList<GmailFile>()
+                for (part in parts) {
+                    if (part.filename != null && part.filename.length > 0) {
+                        val filename = part.getFilename();
+                        gmailList.add(GmailFile(path, filename))
+                    }
+                }
+                launch(UI) {
+                    serviceListener?.currentFiles("", gmailList)
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Problems downloading email", e)
+            }
+        }
+    }
+
     private fun getGmailClient(): Gmail {
         val transport = AndroidHttp.newCompatibleTransport()
         val jsonFactory = JacksonFactory.getDefaultInstance()
-        val gmail = Gmail.Builder(
-                transport, jsonFactory, googleAccountCredential)
+        val gmail = Gmail.Builder(transport, jsonFactory, googleAccountCredential)
                 .setApplicationName("CloudServicesDemo")
                 .build()
         return gmail
     }
-
 
     private fun parseMessage(message: Message): GmailMessage {
         val headers = message.payload.headers
@@ -172,7 +196,6 @@ class GmailService(val activity: Activity) : BaseService() {
         }
         return ""
     }
-
 
     private fun hasPermissions(): Boolean {
         return PermissionsManager.hasPermission(activity, Manifest.permission.GET_ACCOUNTS)
@@ -230,13 +253,20 @@ class GmailService(val activity: Activity) : BaseService() {
     }
 
     override fun downloadFile(data: FileDataType?) {
-        if (data == null || (data !is GmailMessage)) {
+        if (data == null || (data !is GmailFile)) {
             return
         }
         launch(CommonPool) {
             try {
                 val gmail = getGmailClient()
                 val message = gmail.users().messages().get("me", data.id).execute()
+                if (message == null || message.payload == null ||
+                        message.payload.parts == null) {
+                    launch(UI) {
+                        serviceListener?.handleError(CloudServiceException("No attachment found"))
+                    }
+                    return@launch
+                }
                 val parts = message.payload.parts
                 for (part in parts) {
                     if (part.filename != null && part.filename.length > 0) {
@@ -263,14 +293,12 @@ class GmailService(val activity: Activity) : BaseService() {
         }
     }
 
-    override fun getFiles(path: String?) {
-    }
-
     companion object {
         private val SCOPES = listOf(GmailScopes.GMAIL_READONLY)
         const val REQUEST_GET_ACCOUNT_PERMISSIONS = 300
         const val REQUEST_GOOGLE_PLAY_SERVICES = 301
         const val REQUEST_ACCOUNT_PICKER = 302
         const val ACCOUNT_NAME = "ACCOUNT_NAME"
+        const val ROOT_FOLDER = ""
     }
 }

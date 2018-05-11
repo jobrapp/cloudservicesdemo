@@ -9,8 +9,8 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 ext {
     supportVersion = "27.1.1"
-    currentVersionCode = 5
-    currentVersion = '1.5'
+    currentVersionCode = 7
+    currentVersion = "1.7"
     github = 'https://github.com/jobrapp/cloudservicesdemo'
     githubUrl = 'https://github.com/jobrapp/cloudservicesdemo.git'
     projName = 'CloudServices'
@@ -43,6 +43,7 @@ android {
     }
 
     lintOptions {
+        tasks.lint.enabled = false
         ignoreWarnings true
         abortOnError false
     }
@@ -184,23 +185,25 @@ bintray {
     }
     user = bintray_user
     key = bintray_key
-    filesSpec {
-        from ('build/libs') {
-            include '*.jar'
-            rename ("cloudservices-" + currentVersion + "-(.*)\\.jar", projName + '-' + currentVersion + "-\$1.jar")
-        }
-        into buildPath
-        from ('build/outputs/aar') {
-            include 'cloudservices-release.aar'
-            rename {projName + '-' + currentVersion + ".aar"}
-        }
-        into buildPath
-        from ('build/poms') {
-            include '*.xml'
-            rename {projName + '-' + currentVersion + ".pom"}
-        }
-        into buildPath
-    }
+//    filesSpec {
+//        from ('build/libs') {
+//            include '*.jar'
+//            rename ("cloudservices-" + currentVersion + "-(.*)\\.jar", projName + '-' + currentVersion + "-\$1.jar")
+//        }
+////        into '.'
+//        into currentVersion
+//        from ('build/outputs/aar') {
+//            include 'cloudservices-release.aar'
+//            rename {projName + '-' + currentVersion + ".aar"}
+//        }
+////        into '.'
+//        into currentVersion
+//        from ('build/poms') {
+//            include '*.xml'
+//            rename {projName + '-' + currentVersion + ".pom"}
+//        }
+//        into currentVersion
+//    }
 //    dryRun = false //Whether to run this as dry-run, without deploying
     configurations = ['archives']
 //    override = true

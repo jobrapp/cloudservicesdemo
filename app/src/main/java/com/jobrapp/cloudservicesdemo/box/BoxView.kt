@@ -64,6 +64,7 @@ class BoxView : BaseView(), ClickHandler, ServiceListener {
     }
 
     override fun fileDownloaded(file: File) {
+        viewFile(viewContext, file)
         (viewContext as Activity).onBackPressed()
     }
 

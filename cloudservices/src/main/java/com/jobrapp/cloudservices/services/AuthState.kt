@@ -1,7 +1,7 @@
 package com.jobrapp.cloudservices.services
 
 /**
- *
+ * Used to keep track of the current authorization state
  */
 sealed class AuthState {
     class Init : AuthState()

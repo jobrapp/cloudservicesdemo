@@ -13,6 +13,9 @@ abstract class BaseService : Services {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+
+    }
 
     companion object {
         const val REQUEST_DROPBOX_AUTH = 500

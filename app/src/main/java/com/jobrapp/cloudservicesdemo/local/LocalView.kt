@@ -54,6 +54,7 @@ class LocalView : BaseView(), ServiceListener {
     }
 
     override fun fileDownloaded(file: File) {
+        viewFile(viewContext, file)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

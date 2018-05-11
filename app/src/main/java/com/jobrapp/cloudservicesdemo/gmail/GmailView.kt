@@ -8,10 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jobrapp.cloudservices.services.CloudServiceException
-import com.jobrapp.cloudservices.services.FileDataType
-import com.jobrapp.cloudservices.services.GmailMessage
-import com.jobrapp.cloudservices.services.ServiceListener
+import com.jobrapp.cloudservices.services.*
 import com.jobrapp.cloudservices.services.gmail.GmailService
 import com.jobrapp.cloudservicesdemo.ClickHandler
 import com.jobrapp.cloudservicesdemo.R
@@ -48,12 +45,19 @@ class GmailView : BaseView(), ClickHandler, ServiceListener {
         gmailService.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        gmailService.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
     override fun handleError(exception: CloudServiceException) {
     }
 
     override fun handleClick(data: Any?) {
         when (data) {
             is GmailMessage -> {
+                gmailService.getFiles(data.id)
+            }
+            is GmailFile -> {
                 gmailService.downloadFile(data)
             }
         }
@@ -64,6 +68,7 @@ class GmailView : BaseView(), ClickHandler, ServiceListener {
     }
 
     override fun fileDownloaded(file: File) {
+        viewFile(viewContext, file)
         (viewContext as Activity).onBackPressed()
     }
 

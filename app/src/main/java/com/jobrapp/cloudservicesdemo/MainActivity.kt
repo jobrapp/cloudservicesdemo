@@ -68,25 +68,7 @@ class MainActivity : AppCompatActivity(), ClickHandler {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-
-        when (requestCode) {
-            REQUEST_PERMISSIONS -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-
-                }
-
-            }
-
-        }
+        currentView.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun handleClick(data: Any?) {

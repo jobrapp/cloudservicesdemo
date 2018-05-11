@@ -14,6 +14,7 @@ interface ViewInterface {
     fun onCreateView(inflater: LayoutInflater, container: ViewGroup?) : View
     fun onViewCreated(view: View)
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray)
     fun startAuth()
     fun onPause() {}
     fun onResume() {}

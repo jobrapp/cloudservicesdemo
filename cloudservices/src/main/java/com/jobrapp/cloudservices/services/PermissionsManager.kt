@@ -13,7 +13,7 @@ class PermissionsManager {
     companion object {
 
         /**
-         * If on Marshmellow, check if we have this permission, otherwise return true
+         * If on Marshmallow, check if we have this permission, otherwise return true
          * @param permission
          * @return true if the user has granted this permission
          */

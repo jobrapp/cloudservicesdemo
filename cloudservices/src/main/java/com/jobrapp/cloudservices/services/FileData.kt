@@ -10,3 +10,4 @@ data class FileData(val id: String, val name : String, val isFolder : Boolean = 
                     val rev : String? = null,
                     val data : Any? = null) : FileDataType()
 data class GmailMessage(var id: String, val from: String, val subject: String, val date : String) : FileDataType()
+data class GmailFile(var id: String, val fileName: String) : FileDataType()

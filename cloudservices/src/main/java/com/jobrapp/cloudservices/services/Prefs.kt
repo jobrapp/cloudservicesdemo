@@ -10,7 +10,7 @@ import android.util.Log
  */
 
 class Prefs(val context: Context) {
-    private var mSharedPreferences: SharedPreferences? = null
+    private var sharedPreferences: SharedPreferences? = null
     private var currentSharedPreferences: SharedPreferences? = null
 
 
@@ -19,8 +19,8 @@ class Prefs(val context: Context) {
      * @param preferenceName
      */
     fun setSharedPreferences(preferenceName: String) {
-        mSharedPreferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
-        currentSharedPreferences = mSharedPreferences
+        sharedPreferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
+        currentSharedPreferences = sharedPreferences
     }
 
     init {
@@ -28,9 +28,9 @@ class Prefs(val context: Context) {
     }
 
     private fun setupSharedPrefs() {
-        if (mSharedPreferences == null) {
-            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-            currentSharedPreferences = mSharedPreferences
+        if (sharedPreferences == null) {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            currentSharedPreferences = sharedPreferences
         }
     }
 
