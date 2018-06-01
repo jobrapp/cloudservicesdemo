@@ -12,12 +12,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.drive.*
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.TaskCompletionSource
-import com.jobrapp.cloudservices.services.BaseService
-import com.jobrapp.cloudservices.services.CloudServiceException
-import com.jobrapp.cloudservices.services.FileData
-import com.jobrapp.cloudservices.services.FileDataType
+import com.jobrapp.cloudservices.services.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import okio.Okio
 import java.io.File
 import java.util.*
@@ -47,7 +44,6 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
     }
     private var signInAccount : GoogleSignInAccount? = null
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) {
             serviceListener?.cancelled()
@@ -73,6 +69,7 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
      * Starts the sign-in process and initializes the Drive client.
      */
     override fun auth() {
+        authState = AuthState.Authenticating()
         if (signInAccount == null) {
             val requiredScopes = HashSet<Scope>(2)
             requiredScopes.add(Drive.SCOPE_FILE)
@@ -85,11 +82,13 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
                 activity.startActivityForResult(googleSigninClient.signInIntent, REQUEST_CODE_SIGN_IN)
             }
         } else {
+            authState = AuthState.Authenticated()
             pickFiles(null)
         }
     }
 
     override fun logout() {
+        authState = AuthState.Init()
         googleSigninClient.signOut()
     }
 
@@ -98,6 +97,7 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
      * user's account.
      */
     private fun initializeDriveClient(signInAccount: GoogleSignInAccount) {
+        authState = AuthState.Authenticated()
         driveClient = Drive.getDriveClient(activity.getApplicationContext(), signInAccount)
         driveResourceClient = Drive.getDriveResourceClient(activity.getApplicationContext(), signInAccount)
         onDriveClientReady()
@@ -139,10 +139,12 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
                             val sink = Okio.buffer(Okio.sink(tempFile))
                             sink.writeAll(Okio.source(it))
                             sink.close()
-
                             serviceListener?.fileDownloaded(tempFile)
                         } catch (e : Exception) {
                             Log.e(TAG, "Problems saving file", e)
+                            launch(UI) {
+                                serviceListener?.handleError(CloudServiceException("Problems downloading file"))
+                            }
                         }
                     }
                     val discardTask = driveResourceClient?.discardContents(contents)
@@ -201,7 +203,9 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
     fun openItem(data: Intent) {
         val driveId = data.getParcelableExtra<DriveId>(
                 OpenFileActivityOptions.EXTRA_RESPONSE_DRIVE_ID)
-        downloadFile(FileData(driveId.resourceId, driveId.resourceId, false, data = driveId.asDriveFile()))
+        if (driveId != null && driveId.resourceId != null) {
+            downloadFile(FileData(driveId.resourceId!!, driveId.resourceId!!, false, data = driveId.asDriveFile()))
+        }
     }
 
     companion object {

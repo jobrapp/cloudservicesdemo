@@ -5,7 +5,8 @@ package com.jobrapp.cloudservices.services
  */
 sealed class AuthState {
     class Init : AuthState()
+    class Authenticating : AuthState()
     class Cancelled : AuthState()
-    data class Authenticated(val state: Any?) : AuthState()
+    class Authenticated() : AuthState()
     data class Error(val error: Any?) : AuthState()
 }

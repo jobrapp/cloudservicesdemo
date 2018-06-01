@@ -3,10 +3,8 @@ package com.jobrapp.cloudservices.services.onedrive
 import android.app.Activity
 import android.content.Context
 import android.os.Environment
-import com.jobrapp.cloudservices.services.BaseService
-import com.jobrapp.cloudservices.services.CloudServiceException
-import com.jobrapp.cloudservices.services.FileData
-import com.jobrapp.cloudservices.services.FileDataType
+import android.util.Log
+import com.jobrapp.cloudservices.services.*
 import com.onedrive.sdk.authentication.ADALAuthenticator
 import com.onedrive.sdk.authentication.MSAAuthenticator
 import com.onedrive.sdk.concurrency.ICallback
@@ -18,7 +16,7 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import okio.Okio
 import java.io.File
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Service for Microsoft OneDrive
@@ -28,6 +26,7 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
     var client: IOneDriveClient? = null
 
     override fun auth() {
+        authState = AuthState.Authenticating()
         val config = DefaultClientConfig.createWithAuthenticators(MAuthenticator(), AAuthenticator())
         OneDriveClient.Builder().fromConfig(config)
             .loginAndBuildClient(context as Activity, object : ICallback<IOneDriveClient> {
@@ -43,6 +42,7 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
     }
 
     override fun logout() {
+        authState = AuthState.Init()
         client?.authenticator?.logout()
     }
 
@@ -67,7 +67,11 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
         val items = ArrayList<FileData>()
         for (entry in entries) {
             val item = FileData(entry.id, entry.name, (entry.folder != null && entry.folder.childCount > 0))
-            items.add(item)
+            if (entry.folder != null && entry.folder.childCount > 0) {
+                items.add(item)
+            } else if (entry.name.endsWith(".pdf") || entry.name.endsWith(".doc") || entry.name.endsWith(".docx")) {
+                items.add(item)
+            }
         }
         return items
     }
@@ -95,15 +99,22 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
         }
         launch(CommonPool) {
             client?.let {
-                val inputStream = it.drive.getItems(data.id).content.buildRequest().get()
-                val storageDir = this@OneDriveService.context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                val file = File(storageDir, data.name)
-                file.createNewFile()
-                val sink = Okio.buffer(Okio.sink(file))
-                sink.writeAll(Okio.source(inputStream))
-                sink.close()
-                launch(UI) {
-                    serviceListener?.fileDownloaded(file)
+                try {
+                    val inputStream = it.drive.getItems(data.id).content.buildRequest().get()
+                    val storageDir = this@OneDriveService.context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                    val file = File(storageDir, data.name)
+                    file.createNewFile()
+                    val sink = Okio.buffer(Okio.sink(file))
+                    sink.writeAll(Okio.source(inputStream))
+                    sink.close()
+                    launch(UI) {
+                        serviceListener?.fileDownloaded(file)
+                    }
+                } catch (e : Exception) {
+                    Log.e("OneDriveService", "Problems downloading file", e)
+                    launch(UI) {
+                        serviceListener?.handleError(CloudServiceException("Problems downloading file"))
+                    }
                 }
             }
         }

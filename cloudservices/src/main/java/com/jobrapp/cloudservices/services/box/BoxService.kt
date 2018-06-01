@@ -31,6 +31,7 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
     }
 
     override fun auth() {
+        authState = AuthState.Authenticating()
         val token : String? = client.authInfo?.accessToken()
         if (token != null && token.isNotEmpty()) {
             getFiles(ROOT_FOLDER)
@@ -40,6 +41,7 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
                         if (response.isSuccess) {
                             val authToken = response.result.authInfo.accessToken()
                             if (authToken != null) {
+                                authState = AuthState.Authenticated()
                                 prefs.putString(BOX_ACCESS_TOKEN, authToken)
                                 getFiles(ROOT_FOLDER)
                             }
@@ -51,6 +53,7 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
     }
 
     override fun logout() {
+        authState = AuthState.Init()
         client.logout()
     }
 
@@ -60,18 +63,24 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
             return
         }
         launch(CommonPool) {
-            val storageDir = this@BoxService.context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-            val file = File(storageDir, data.name)
-            file.createNewFile()
-            val fileApi = BoxApiFile(client)
-            val download = fileApi.getDownloadRequest(file, data.id)
-                    .send()
-
-            if (download != null) {
-                launch(UI) {
-                    serviceListener?.fileDownloaded(file)
+            try {
+                val storageDir = this@BoxService.context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                val file = File(storageDir, data.name)
+                file.createNewFile()
+                val fileApi = BoxApiFile(client)
+                val download = fileApi.getDownloadRequest(file, data.id)
+                        .send()
+                if (download != null) {
+                    launch(UI) {
+                        serviceListener?.fileDownloaded(file)
+                    }
+                } else {
+                    launch(UI) {
+                        serviceListener?.handleError(CloudServiceException("Problems downloading file"))
+                    }
                 }
-            } else {
+            } catch (e : Exception) {
+//                Log.e("BoxService", "Problems downloading file", e)
                 launch(UI) {
                     serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                 }
@@ -94,7 +103,7 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
                 }
 
             } catch (e : Exception) {
-                Log.e(TAG, "Problems getting Box files", e)
+//                Log.e(TAG, "Problems getting Box files", e)
                 serviceListener?.handleError(CloudServiceException("Problems Getting files for path $path"))
             }
         }
@@ -107,7 +116,11 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
         val items = ArrayList<FileData>()
         for (entry in entries) {
             val item = FileData(entry.id, entry.name, entry is BoxFolder, entry.id)
-            items.add(item)
+            if (entry is BoxFolder) {
+                items.add(item)
+            } else if (entry.name.endsWith(".pdf") || entry.name.endsWith(".doc") || entry.name.endsWith(".docx")) {
+                items.add(item)
+            }
         }
         return items
     }

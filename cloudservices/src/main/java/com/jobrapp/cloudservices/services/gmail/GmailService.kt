@@ -54,6 +54,7 @@ class GmailService(val activity: Activity) : BaseService() {
     }
 
     override fun auth() {
+        authState = AuthState.Authenticating()
         if (!isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices()
         } else if (!hasPermissions()) {
@@ -66,6 +67,7 @@ class GmailService(val activity: Activity) : BaseService() {
     }
 
     override fun logout() {
+        authState = AuthState.Init()
         googleSigninClient.signOut()
     }
 
@@ -75,6 +77,8 @@ class GmailService(val activity: Activity) : BaseService() {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     auth()
+                } else {
+                    serviceListener?.cancelled()
                 }
             }
         }
@@ -95,6 +99,7 @@ class GmailService(val activity: Activity) : BaseService() {
                 accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
                 prefs.putString(ACCOUNT_NAME, accountName!!)
                 googleAccountCredential.selectedAccountName = accountName
+                authState = AuthState.Authenticated()
                 getEmails()
             }
             REQUEST_GOOGLE_PLAY_SERVICES, REQUEST_GET_ACCOUNT_PERMISSIONS -> {
@@ -108,7 +113,7 @@ class GmailService(val activity: Activity) : BaseService() {
             try {
                 val gmail = getGmailClient()
                 // Get the current user's emails that have attachments
-                var listMessagesResponse = gmail.users().messages().list("me").setQ("has:attachment").execute()
+                var listMessagesResponse = gmail.users().messages().list("me").setQ(QUERY).execute()
                 if (listMessagesResponse != null) {
                     val allMessages = ArrayList<Message>()
                     var messages = listMessagesResponse.messages
@@ -116,7 +121,7 @@ class GmailService(val activity: Activity) : BaseService() {
                         allMessages.addAll(messages)
                         if (listMessagesResponse.nextPageToken != null) {
                             listMessagesResponse = gmail.users().messages().list("me")
-                                    .setQ("has:attachment")
+                                    .setQ(QUERY)
                                     .setPageToken(listMessagesResponse.nextPageToken)
                                     .execute()
                             messages = listMessagesResponse.messages
@@ -283,12 +288,16 @@ class GmailService(val activity: Activity) : BaseService() {
                         launch(UI) {
                             serviceListener?.fileDownloaded(file)
                         }
+                        break
                     }
                 }
             } catch (e: UserRecoverableAuthIOException) {
                 activity.startActivityForResult(e.intent, REQUEST_GET_ACCOUNT_PERMISSIONS)
             } catch (e: Exception) {
                 Log.e(TAG, "Problems downloading email", e)
+                launch(UI) {
+                    serviceListener?.handleError(CloudServiceException("Problems downloading file"))
+                }
             }
         }
     }
@@ -299,6 +308,6 @@ class GmailService(val activity: Activity) : BaseService() {
         const val REQUEST_GOOGLE_PLAY_SERVICES = 301
         const val REQUEST_ACCOUNT_PICKER = 302
         const val ACCOUNT_NAME = "ACCOUNT_NAME"
-        const val ROOT_FOLDER = ""
+        const val QUERY = "has:attachment AND filename:.doc OR filename:.docx OR filename:.pdf"
     }
 }
