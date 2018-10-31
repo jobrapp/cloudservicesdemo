@@ -3,6 +3,7 @@ package com.jobrapp.cloudservices.services.googledrive
 import android.app.Activity
 import android.content.Intent
 import android.os.Environment
+import android.provider.Contacts
 import android.support.v4.app.ActivityCompat.startIntentSenderForResult
 import android.util.Log
 import android.widget.Toast
@@ -13,8 +14,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.drive.*
 import com.jobrapp.cloudservices.services.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okio.Okio
 import java.io.File
 import java.util.*
@@ -142,7 +144,7 @@ class GoogleDriveService(val activity: Activity, val config: GoogleDriveConfig) 
                             serviceListener?.fileDownloaded(tempFile)
                         } catch (e : Exception) {
                             Log.e(TAG, "Problems saving file", e)
-                            launch(UI) {
+                            GlobalScope.launch(Dispatchers.Main) {
                                 serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                             }
                         }

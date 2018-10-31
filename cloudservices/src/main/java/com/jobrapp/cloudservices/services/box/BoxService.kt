@@ -2,7 +2,7 @@ package com.jobrapp.cloudservices.services.box
 
 import android.content.Context
 import android.os.Environment
-import android.util.Log
+import android.provider.Contacts
 import com.box.androidsdk.content.BoxApiFile
 import com.box.androidsdk.content.BoxApiFolder
 import com.box.androidsdk.content.BoxConfig
@@ -10,9 +10,9 @@ import com.box.androidsdk.content.models.BoxFolder
 import com.box.androidsdk.content.models.BoxItem
 import com.box.androidsdk.content.models.BoxSession
 import com.jobrapp.cloudservices.services.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -62,7 +62,7 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
             serviceListener?.handleError(CloudServiceException("No download file provided"))
             return
         }
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             try {
                 val storageDir = this@BoxService.context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
                 val file = File(storageDir, data.name)
@@ -71,17 +71,17 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
                 val download = fileApi.getDownloadRequest(file, data.id)
                         .send()
                 if (download != null) {
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.fileDownloaded(file)
                     }
                 } else {
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                     }
                 }
             } catch (e : Exception) {
 //                Log.e("BoxService", "Problems downloading file", e)
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                 }
             }
@@ -92,12 +92,12 @@ class BoxService(val context: Context, config: BoxServiceConfig) : BaseService()
         if (path == null) {
             return
         }
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             try {
                 val folderAPI = BoxApiFolder(client)
                 val items = folderAPI.getItemsRequest(path).send()
                 if (items != null) {
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.currentFiles(path, convertEntries(items.entries))
                     }
                 }

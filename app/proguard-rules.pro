@@ -30,6 +30,13 @@
 -dontwarn retrofit.appengine.**
 -dontwarn retrofit2.**
 
+##== Coroutines ==
+# ServiceLoader support
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
 
 # From Gmail
 -keep class com.google.api.services.gmail.** { *; }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
+import android.provider.Contacts
 import android.util.Log
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.android.Auth
@@ -11,9 +12,9 @@ import com.dropbox.core.android.AuthActivity
 import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.*
 import com.jobrapp.cloudservices.services.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -67,11 +68,11 @@ class DropboxService(val context: Context, val config: DropboxConfig) : BaseServ
         if (path == null) {
             return
         }
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             val files = client?.files()
             if (files != null) {
                 val metaDataEntries = filterFiles(getEntries(files, files.listFolder(path)))
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     serviceListener?.currentFiles(path, convertEntries(metaDataEntries))
                 }
             }
@@ -122,19 +123,19 @@ class DropboxService(val context: Context, val config: DropboxConfig) : BaseServ
 
     override fun downloadFile(data: FileDataType?) {
         if (data != null && (data is FileData)) {
-            launch(CommonPool) {
+            GlobalScope.launch(Dispatchers.Default) {
                 try {
                     val storageDir = this@DropboxService.context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
                     val file = File(storageDir, data.name)
                     file.createNewFile()
                     client?.files()?.download(data.path, data.rev)
                             ?.download(FileOutputStream(file))
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.fileDownloaded(file)
                     }
                 } catch (e : Exception) {
                     Log.e("DropboxService", "Problems downloading file", e)
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                     }
                 }

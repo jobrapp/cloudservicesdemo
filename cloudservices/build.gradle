@@ -11,9 +11,9 @@ ext {
     playVersion = "15.0.1"
     supportVersion = "27.1.1"
 //    coroutineVersion = "0.22.5" // Problems with this version & proguard
-    coroutineVersion = "0.20"
-    currentVersionCode = 9
-    currentVersion = "1.9"
+    coroutineVersion = "1.0.0"
+    currentVersionCode = 10
+    currentVersion = "1.10"
     github = 'https://github.com/jobrapp/cloudservicesdemo'
     githubUrl = 'https://github.com/jobrapp/cloudservicesdemo.git'
     projName = 'CloudServices'
@@ -24,10 +24,10 @@ ext {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode currentVersionCode
         versionName currentVersion
@@ -59,7 +59,7 @@ dependencies {
     implementation "com.android.support:design:$supportVersion"
     implementation "com.android.support:appcompat-v7:$supportVersion"
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
 
     implementation 'com.squareup.okio:okio:1.14.0'
 
@@ -76,11 +76,11 @@ dependencies {
     }
 
     // Dropbox
-    implementation 'com.dropbox.core:dropbox-core-sdk:3.0.7'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.dropbox.core:dropbox-core-sdk:3.0.10'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     // Box
-    implementation 'com.box:box-android-sdk:4.1.0'
+    implementation 'com.box:box-android-sdk:4.2.0'
 
     // Microsoft
     // Include the sdk as a dependency
@@ -94,8 +94,8 @@ dependencies {
 
     // Test
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 
 repositories {

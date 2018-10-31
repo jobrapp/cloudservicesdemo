@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Environment
+import android.provider.Contacts
 import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -24,9 +25,9 @@ import com.google.api.services.gmail.GmailScopes
 import com.google.api.services.gmail.model.Message
 import com.google.api.services.gmail.model.MessagePartHeader
 import com.jobrapp.cloudservices.services.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okio.Okio
 import java.io.File
 
@@ -109,7 +110,7 @@ class GmailService(val activity: Activity) : BaseService() {
     }
 
     fun getEmails() {
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             try {
                 val gmail = getGmailClient()
                 // Get the current user's emails that have attachments
@@ -137,7 +138,7 @@ class GmailService(val activity: Activity) : BaseService() {
                             gMessages.add(parseMessage(gMessage))
                         }
                     }
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.currentFiles("", gMessages)
                     }
                 }
@@ -153,7 +154,7 @@ class GmailService(val activity: Activity) : BaseService() {
         if (path == null) {
             return
         }
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             try {
                 val gmail = getGmailClient()
                 val message = gmail.users().messages().get("me", path).execute()
@@ -165,7 +166,7 @@ class GmailService(val activity: Activity) : BaseService() {
                         gmailList.add(GmailFile(path, filename))
                     }
                 }
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     serviceListener?.currentFiles("", gmailList)
                 }
 
@@ -261,13 +262,13 @@ class GmailService(val activity: Activity) : BaseService() {
         if (data == null || (data !is GmailFile)) {
             return
         }
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             try {
                 val gmail = getGmailClient()
                 val message = gmail.users().messages().get("me", data.id).execute()
                 if (message == null || message.payload == null ||
                         message.payload.parts == null) {
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.handleError(CloudServiceException("No attachment found"))
                     }
                     return@launch
@@ -285,7 +286,7 @@ class GmailService(val activity: Activity) : BaseService() {
                         val fileByteArray = Base64.decodeBase64(attachPart.data)
                         sink.write(fileByteArray)
                         sink.close()
-                        launch(UI) {
+                        GlobalScope.launch(Dispatchers.Main) {
                             serviceListener?.fileDownloaded(file)
                         }
                         break
@@ -295,7 +296,7 @@ class GmailService(val activity: Activity) : BaseService() {
                 activity.startActivityForResult(e.intent, REQUEST_GET_ACCOUNT_PERMISSIONS)
             } catch (e: Exception) {
                 Log.e(TAG, "Problems downloading email", e)
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                 }
             }

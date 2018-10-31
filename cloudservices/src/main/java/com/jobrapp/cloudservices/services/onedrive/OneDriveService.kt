@@ -3,6 +3,7 @@ package com.jobrapp.cloudservices.services.onedrive
 import android.app.Activity
 import android.content.Context
 import android.os.Environment
+import android.provider.Contacts
 import android.util.Log
 import com.jobrapp.cloudservices.services.*
 import com.onedrive.sdk.authentication.ADALAuthenticator
@@ -11,9 +12,9 @@ import com.onedrive.sdk.concurrency.ICallback
 import com.onedrive.sdk.core.ClientException
 import com.onedrive.sdk.core.DefaultClientConfig
 import com.onedrive.sdk.extensions.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okio.Okio
 import java.io.File
 import java.util.*
@@ -77,7 +78,7 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
     }
 
     private fun getRoot(getRootFiles : Boolean = false) {
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             client?.drive?.root?.buildRequest()?.get(object : ICallback<Item> {
                 override fun success(result: Item) {
                     rootDriveID = result.id
@@ -97,7 +98,7 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
         if (data == null || (data !is FileData)) {
             return
         }
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.Default) {
             client?.let {
                 try {
                     val inputStream = it.drive.getItems(data.id).content.buildRequest().get()
@@ -107,12 +108,12 @@ class OneDriveService(val context: Context, val config : OneDriveConfig) : BaseS
                     val sink = Okio.buffer(Okio.sink(file))
                     sink.writeAll(Okio.source(inputStream))
                     sink.close()
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.fileDownloaded(file)
                     }
                 } catch (e : Exception) {
                     Log.e("OneDriveService", "Problems downloading file", e)
-                    launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         serviceListener?.handleError(CloudServiceException("Problems downloading file"))
                     }
                 }
