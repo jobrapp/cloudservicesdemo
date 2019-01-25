@@ -12,8 +12,8 @@ ext {
     supportVersion = "28.0.0"
 //    coroutineVersion = "0.22.5" // Problems with this version & proguard
     coroutineVersion = "1.0.0"
-    currentVersionCode = 10
-    currentVersion = "1.10"
+    currentVersionCode = 11
+    currentVersion = "1.11"
     github = 'https://github.com/jobrapp/cloudservicesdemo'
     githubUrl = 'https://github.com/jobrapp/cloudservicesdemo.git'
     projName = 'CloudServices'
