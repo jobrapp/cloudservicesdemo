@@ -309,6 +309,6 @@ class GmailService(val activity: Activity) : BaseService() {
         const val REQUEST_GOOGLE_PLAY_SERVICES = 301
         const val REQUEST_ACCOUNT_PICKER = 302
         const val ACCOUNT_NAME = "ACCOUNT_NAME"
-        const val QUERY = "has:attachment AND filename:.doc OR filename:.docx OR filename:.pdf"
+        const val QUERY = "has:attachment AND {filename:doc filename:docx filename:pdf}"
     }
 }
